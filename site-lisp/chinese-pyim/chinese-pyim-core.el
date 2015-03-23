@@ -1284,7 +1284,7 @@ Return the input string."
 
 ;; **** 获得词语拼音并进一步查询得到备选词列表
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-get-choices (pylist)
+(defun pyim-get-choices (pylist &optional old-pylist)
   "得到可能的词组和汉字。例如：
 
  (pyim-get-choices  (pyim-split-string \"pin-yin\"))
@@ -1297,11 +1297,11 @@ Return the input string."
   (let (choice words chars wordspy choice)
     (setq wordspy (pyim-possible-words-py pylist))
     (if wordspy
-        (setq words (pyim-possible-words wordspy)))
+        (setq words (pyim-possible-words wordspy old-pylist)))
     (setq chars (pyim-get (concat (caar pylist) (cdar pylist)))
           choice (append words chars))))
 
-(defun pyim-possible-words (wordspy)
+(defun pyim-possible-words (wordspy &optional old-pylist)
   "根据拼音得到可能的词组。例如：
   (pyim-possible-words '((\"p-y\" (\"p\" . \"in\") (\"y\" . \"\"))))
     => (#(\"拼音\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) #(\"贫铀\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) #(\"聘用\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))))
@@ -1311,7 +1311,8 @@ Return the input string."
     (dolist (word (reverse wordspy))
       (if (listp word)
           (setq words (append words (pyim-match-word (pyim-get (car word))
-                                                     (cdr word))))
+                                                     (cdr word)
+                                                     old-pylist)))
         (setq words (append words (mapcar (lambda (w)
                                             (propertize w 'py (list word)))
                                           (pyim-get word))))))
@@ -1353,7 +1354,7 @@ Return the input string."
       (car py)
     (cdr py)))
 
-(defun pyim-match-word (wordlist wordspy)
+(defun pyim-match-word (wordlist wordspy &optional old-pylist)
   "给出一个词组列表和它的拼音列表，给出所有可能的词组，并加上一个 py
 属性。例如：
 
@@ -1392,7 +1393,7 @@ Return the input string."
 ;; 2. 显示备选词条和选择备选词等待用户选择。
 
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-handle-string ()
+(defun pyim-handle-string (&optional old-pylist)
   (let ((str pyim-current-key)
         userpos wordspy)
     (setq pyim-pinyin-list (pyim-split-string str)
@@ -1403,7 +1404,7 @@ Return the input string."
                          pyim-current-key (pyim-restore-user-divide
                                            (pyim-pylist-to-string pyim-pinyin-list)
                                            userpos))
-                   (setq pyim-current-choices (list (delete-dups (pyim-get-choices pyim-pinyin-list))))
+                   (setq pyim-current-choices (list (delete-dups (pyim-get-choices pyim-pinyin-list old-pylist))))
                    (when  (car pyim-current-choices)
                      (setq pyim-current-pos 1)
                      (pyim-update-current-str)
