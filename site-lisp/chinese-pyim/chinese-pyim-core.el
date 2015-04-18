@@ -1307,6 +1307,7 @@ Return the input string."
     => (#(\"拼音\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) #(\"贫铀\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) #(\"聘用\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))))
 
 "
+  (message "pyim-possible-words called => %s %s" wordspy old-pylist)
   (let (words)
     (dolist (word (reverse wordspy))
       (if (listp word)
@@ -1365,6 +1366,7 @@ Return the input string."
   => (#(\"拼音\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) #(\"贫铀\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) #(\"聘用\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))))
 
 "
+  (message "pyim-match-word called => %s %s %s" wordlist wordspy old-pylist)
   (let (words)
     (dolist (word wordlist)
       ;;      (message "word: %s" word)
@@ -1375,7 +1377,11 @@ Return the input string."
           ;; (message "py: %s" py)
           (when (string< "" (cdr py))
             (let (chmatch)
+              (message "pyim-get-char-code=%s %s" (pyim-get-char-code (aref word i)) (cdr py))
+
               (dolist (chpy (pyim-get-char-code (aref word i)))
+                ;; (message "chpy=%s %s" chpy (pyim-get-char-code (aref word i)))
+                ;; (message "cmp %s %s" (cdr (pyim-get-sm chpy)) (cdr py))
                 (if (string= (cdr (pyim-get-sm chpy)) (cdr py))
                     (setq chmatch t)))
               (or chmatch (setq match nil)))))

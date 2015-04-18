@@ -35,19 +35,26 @@ when toggle off input method, switch to evil-normal-state if current state is ev
        "As Shanghai guy, I can't tell difference between:
   - 'en' and 'eng'
   - 'in' and 'ing'"
+       (message "pyim-fuzzy-pinyin-adjust-shanghai called =%s" pyim-current-key)
        (interactive)
-       (cond
-        ((string-match-p "[a-z][ei]ng?-.*[a-z][ei]ng?" pyim-current-key)
-         ;; for two fuzzy pinyin characters, just use its SHENMU as key
-         (setq pyim-current-key (replace-regexp-in-string "\\([a-z]\\)[ie]ng" "\\1" pyim-current-key)))
-        (t
-         ;; single fuzzy pinyin character
+
+       (let ((old-pylist pyim-current-key))
          (cond
-          ((string-match-p "[ei]ng" pyim-current-key)
-           (setq pyim-current-key (replace-regexp-in-string "\\([ei]\\)ng" "\\1n" pyim-current-key)))
-          ((string-match-p "[ie]n[^g]*" pyim-current-key)
-           (setq pyim-current-key (replace-regexp-in-string "\\([ie]\\)n" "\\1ng" pyim-current-key))))))
-       (pyim-handle-string))
+          ((string-match-p "[a-z][ei]ng?-.*[a-z][ei]ng?" pyim-current-key)
+           ;; for two fuzzy pinyin characters, just use its SHENMU as key
+           (setq pyim-current-key (replace-regexp-in-string "\\([a-z]\\)[ie]ng" "\\1" pyim-current-key)))
+          (t
+           ;; single fuzzy pinyin character
+           (cond
+            ((string-match-p "[ei]ng" pyim-current-key)
+             (setq pyim-current-key (replace-regexp-in-string "\\([ei]\\)ng" "\\1n" pyim-current-key)))
+            ((string-match-p "[ie]n[^g]*" pyim-current-key)
+             (setq pyim-current-key (replace-regexp-in-string "\\([ie]\\)n" "\\1ng" pyim-current-key))))))
+         (message "new pyim-current-key=%s" pyim-current-key)
+         (if (string= pyim-current-key old-pylist)
+             (pyim-handle-string)
+           (pyim-handle-string old-pylist))
+         ))
 
      ;; Comment out below line for default fuzzy algorithm,
      ;; or just `(setq pyim-fuzzy-pinyin-adjust-function nil)`
