@@ -178,60 +178,12 @@ Merge RLT and EXTRA-RLT, items in RLT has *higher* priority."
   (setq extra-rlt (js2-imenu--remove-duplicate-items extra-rlt))
   (append rlt extra-rlt))
 
-(defun my-js2-node-at-point-visitor (node end-p)
-  (let ((rel-pos (js2-node-pos node))
-        abs-pos
-        abs-end
-        (point js2-node-search-point))
-    (message "my-js2-node-at-point-visitor called => %s %s" node end-p)
-    (cond
-     (end-p
-      ;; this evaluates to a non-nil return value, even if it's zero
-      (cl-decf js2-visitor-offset rel-pos))
-     ;; we already looked for comments before visiting, and don't want them now
-     ((js2-comment-node-p node)
-      nil)
-     (t
-      (setq abs-pos (cl-incf js2-visitor-offset rel-pos)
-            ;; we only want to use the node if the point is before
-            ;; the last character position in the node, so we decrement
-            ;; the absolute end by 1.
-            abs-end (+ abs-pos (js2-node-len node) -1))
-      (cond
-       ;; If this node starts after search-point, stop the search.
-       ((> abs-pos point)
-        (throw 'js2-visit-done nil))
-       ;; If this node ends before the search-point, don't check kids.
-       ((> point abs-end)
-        nil)
-       (t
-        ;; Otherwise point is within this node, possibly in a child.
-        (setq js2-discovered-node node)
-        t))))))
-
-(defun my-js2-node-at-point ()
-  (let ((ast js2-mode-ast)
-        pos
-        result)
-    (setq pos (point))
-    (unless (and ast (< pos (js2-node-abs-end ast)))
-      (error "No JSON path found"))
-
-    (setq js2-discovered-node nil
-          js2-visitor-offset 0
-          js2-node-search-point pos)
-    (unwind-protect
-        (catch 'js2-visit-done
-          (js2-visit-ast ast #'my-js2-node-at-point-visitor))
-      (setq js2-visitor-offset nil
-            js2-node-search-point nil))
-    (setq result js2-discovered-node)
-    result))
 
 (defun js2-print-path ()
   (interactive)
   (let (node)
-   (setq node (my-js2-node-at-point))
+   (setq node (js2-node-at-point))
+   ;; since scanning from AST, no way to optimise `js2-node-at-point'
    (message "node=%s" node)
     ))
 
