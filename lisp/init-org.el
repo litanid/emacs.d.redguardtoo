@@ -151,16 +151,14 @@
 (defadvice org-publish (around org-publish-advice activate)
   "Stop running major-mode hook when org-publish"
   (let ((old load-user-customized-major-mode-hook))
-	(setq load-user-customized-major-mode-hook nil)
+    (setq load-user-customized-major-mode-hook nil)
     ad-do-it
-	(setq load-user-customized-major-mode-hook old)))
+    (setq load-user-customized-major-mode-hook old)))
 
 ;; {{ org2nikola set up
 (setq org2nikola-output-root-directory "~/.config/nikola")
-(setq org2nikola-use-google-code-prettify t)
-(setq org2nikola-prettify-unsupported-language
-      '(elisp "lisp"
-              emacs-lisp "lisp"))
+;; n
+(setq org2nikola-use-verbose-metadata t) ;; required by nikola 7.7+
 ;; }}
 
 (provide 'init-org)
